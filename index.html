@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Album Cover: Binary Hearts</title>
+    <!-- Google Fonts: Rajdhani for title, Chakra Petch for artist name -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500&family=Chakra+Petch:wght@300;500&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables for consistent theming */
+        :root {
+            --bg-dark: #10101a;
+            --bg-light: #1d1d2b;
+            --text-color: #d0d0e0;
+            --glow-color-1: #ff4d9e; /* Pink glow */
+            --glow-color-2: #4dffff; /* Cyan glow */
+            --glow-color-3: #f9a8d4; /* Soft pink glow */
+            --hand-flesh-color: #5a5a6a; /* Dark grey for flesh hand stroke */
+        }
+
+        /* Basic body styling for full-screen centering and background */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--bg-dark);
+            margin: 0;
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden; /* Prevent scrollbars due to animations */
+            -webkit-font-smoothing: antialiased; /* Smoother font rendering */
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Main album container, responsive sizing */
+        .album-container {
+            width: 90vmin; /* Responsive width based on viewport min dimension */
+            max-width: 600px; /* Maximum width for larger screens */
+            height: 90vmin; /* Responsive height */
+            max-height: 600px; /* Maximum height */
+            background: radial-gradient(ellipse at bottom, var(--bg-light) 0%, var(--bg-dark) 70%);
+            position: relative;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.7); /* Deep shadow for depth */
+            overflow: hidden; /* Clip content outside the container */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #2a2a3a; /* Subtle border */
+            border-radius: 8px; /* Slightly rounded corners for modern look */
+        }
+
+        /* Background particles container */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none; /* Allow clicks to pass through */
+        }
+
+        /* Individual particle styling and animation */
+        .particle {
+            position: absolute;
+            background-color: var(--glow-color-2); /* Default particle color */
+            border-radius: 50%;
+            opacity: 0;
+            animation: rise 10s infinite linear; /* Particle movement animation */
+            box-shadow: 0 0 5px var(--glow-color-2); /* Subtle glow for particles */
+        }
+
+        /* Keyframes for particle rising animation */
+        @keyframes rise {
+            0% {
+                transform: translateY(100vh) scale(0.5);
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1; /* Fully opaque mid-animation */
+            }
+            100% {
+                transform: translateY(-10vh) scale(1.2);
+                opacity: 0; /* Fade out at the top */
+            }
+        }
+        
+        /* Container for the hands, allowing independent positioning and scaling */
+        .hands-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: scale(0.8); /* Slightly scale down the hands */
+            z-index: 1; /* Ensure hands are above particles */
+        }
+        
+        /* Base styling for SVG hands */
+        .hand {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-width: 2; /* Stroke width for hand outlines */
+            animation: float 6s ease-in-out infinite; /* Floating animation */
+            transform-origin: center; /* Ensure rotation is around the center */
+        }
+
+        /* Styling for the 'flesh' hand (left) */
+        .hand-flesh {
+            stroke: var(--hand-flesh-color);
+            transform: translateX(-80px) rotate(-15deg); /* Initial position and rotation */
+            animation-delay: -3s; /* Stagger animation start */
+            filter: drop-shadow(0 0 3px rgba(0,0,0,0.5)); /* Subtle shadow for depth */
+        }
+
+        /* Styling for the 'wire' hand (right) */
+        .hand-wire {
+            stroke: var(--glow-color-2); /* Cyan glow for wire hand */
+            transform: translateX(80px) rotate(15deg) scaleX(-1); /* Mirrored position and rotation */
+            filter: drop-shadow(0 0 8px var(--glow-color-2)) drop-shadow(0 0 15px var(--glow-color-2)); /* Stronger glow */
+        }
+        
+        /* Keyframes for floating animation */
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(0, -15px) rotate(2deg); }
+        }
+        /* Specific float animations for each hand to create a subtle counter-movement */
+        .hand-flesh { animation-name: float-flesh; }
+        .hand-wire { animation-name: float-wire; }
+
+        @keyframes float-flesh {
+             0%, 100% { transform: translateX(-80px) rotate(-15deg) translateY(0); }
+             50% { transform: translateX(-85px) rotate(-17deg) translateY(-10px); }
+        }
+        @keyframes float-wire {
+             0%, 100% { transform: translateX(80px) rotate(15deg) scaleX(-1) translateY(0); }
+             50% { transform: translateX(85px) rotate(17deg) scaleX(-1) translateY(10px); }
+        }
+
+        /* Pulsating heart glow effect */
+        .heart-glow {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            z-index: 2; /* Ensure heart is above hands */
+            animation: heartbeat 2.5s infinite ease-in-out; /* Heartbeat animation */
+        }
+        
+        /* Pseudo-elements for the layered glow effect of the heart */
+        .heart-glow::before,
+        .heart-glow::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--glow-color-1) 10%, transparent 70%); /* Main pink glow */
+            filter: blur(15px);
+            opacity: 0.8;
+        }
+        
+        .heart-glow::after {
+            background: radial-gradient(circle, var(--glow-color-3) 10%, transparent 60%); /* Softer pink glow layer */
+            animation: glitch-pulse 5s infinite; /* Glitch-like pulse */
+        }
+        
+        /* Keyframes for heartbeat animation */
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            10% { transform: scale(1.1); } /* Larger pulse */
+            20% { transform: scale(0.95); } /* Smaller recoil */
+            30% { transform: scale(1.05); } /* Secondary pulse */
+            40% { transform: scale(1); }
+        }
+        
+        /* Keyframes for glitch-pulse animation */
+        @keyframes glitch-pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; filter: blur(20px); } /* Stronger blur and opacity */
+            51% { opacity: 0.5; filter: blur(10px); } /* Quick flicker */
+            52% { opacity: 1; }
+        }
+
+        /* Album title styling */
+        .title {
+            position: absolute;
+            top: 15%; /* Position from top */
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 300;
+            font-size: clamp(2.5rem, 10vmin, 4.5rem); /* Responsive font size */
+            color: var(--text-color);
+            letter-spacing: 0.1em; /* Spaced out letters */
+            text-shadow: 0 0 10px var(--glow-color-3); /* Soft text glow */
+            animation: text-flicker 15s linear infinite; /* Subtle flicker effect */
+            z-index: 3; /* Ensure title is on top */
+            text-align: center; /* Center text */
+            padding: 0 10px; /* Small padding to prevent text from touching edges on very small screens */
+        }
+        
+        /* Keyframes for text flicker animation */
+        @keyframes text-flicker {
+            0%, 19.9%, 22%, 62.9%, 64%, 65.9%, 70%, 100% {
+                opacity: 0.99;
+                text-shadow: 0 0 10px var(--glow-color-3);
+            }
+            20%, 21.9%, 63%, 63.9%, 65%, 69.9% {
+                opacity: 0.4;
+                text-shadow: none;
+            }
+        }
+
+        /* Artist name styling */
+        .artist-name {
+            position: absolute;
+            bottom: 8%; /* Position from bottom */
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: clamp(0.8rem, 3vmin, 1.2rem); /* Responsive font size */
+            color: var(--text-color);
+            opacity: 0.5; /* Subtler opacity */
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            z-index: 3; /* Ensure artist name is on top */
+            text-align: center;
+            padding: 0 10px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="album-container">
+        <div class="particles"></div>
+
+        <div class="hands-container">
+            <!-- SVG for the 'flesh' hand - more organic and detailed -->
+            <svg class="hand hand-flesh" viewBox="0 0 200 200">
+                <path d="M100,180 C80,170 60,150 50,120 C40,90 50,60 70,40 C90,20 120,20 140,40 C160,60 160,90 150,120 C140,150 120,170 100,180 Z" />
+                <!-- Fingers -->
+                <path d="M105,100 C100,80 110,60 120,70 L125,85" />
+                <path d="M95,105 C90,85 95,65 105,75 L110,90" />
+                <path d="M85,110 C80,90 85,70 95,80 L100,95" />
+                <path d="M75,115 C70,95 75,75 85,85 L90,100" />
+                <!-- Thumb -->
+                <path d="M65,130 C55,110 50,90 60,95 L70,110" />
+            </svg>
+            
+            <!-- SVG for the 'wire' hand - geometric, segmented, and glowing -->
+            <svg class="hand hand-wire" viewBox="0 0 200 200">
+                <!-- Palm/Base -->
+                <path d="M100,180 L80,170 L60,150 L50,120 L40,90 L50,60 L70,40 L90,20 L120,20 L140,40 L160,60 L160,90 L150,120 L140,150 L120,170 L100,180 Z" />
+                <!-- Fingers (segmented lines and small rectangles for joints) -->
+                <line x1="105" y1="100" x2="110" y2="85" />
+                <rect x="108" y="83" width="4" height="4" rx="1" ry="1"/>
+                <line x1="110" y1="85" x2="115" y2="70" />
+                <rect x="113" y="68" width="4" height="4" rx="1" ry="1"/>
+                <line x1="115" y1="70" x2="120" y2="55" />
+
+                <line x1="95" y1="105" x2="100" y2="90" />
+                <rect x="98" y="88" width="4" height="4" rx="1" ry="1"/>
+                <line x1="100" y1="90" x2="105" y2="75" />
+                <rect x="103" y="73" width="4" height="4" rx="1" ry="1"/>
+                <line x1="105" y1="75" x2="110" y2="60" />
+
+                <line x1="85" y1="110" x2="90" y2="95" />
+                <rect x="88" y="93" width="4" height="4" rx="1" ry="1"/>
+                <line x1="90" y1="95" x2="95" y2="80" />
+                <rect x="93" y="78" width="4" height="4" rx="1" ry="1"/>
+                <line x1="95" y1="80" x2="100" y2="65" />
+
+                <line x1="75" y1="115" x2="80" y2="100" />
+                <rect x="78" y="98" width="4" height="4" rx="1" ry="1"/>
+                <line x1="80" y1="100" x2="85" y2="85" />
+                <rect x="83" y="83" width="4" height="4" rx="1" ry="1"/>
+                <line x1="85" y1="85" x2="90" y2="70" />
+
+                <!-- Thumb (segmented) -->
+                <line x1="65" y1="130" x2="70" y2="115" />
+                <rect x="68" y="113" width="4" height="4" rx="1" ry="1"/>
+                <line x1="70" y1="115" x2="75" y2="100" />
+
+                <!-- Internal circuitry lines -->
+                <line x1="80" y1="150" x2="120" y2="150" stroke-width="1" opacity="0.6"/>
+                <line x1="90" y1="130" x2="110" y2="130" stroke-width="1" opacity="0.6"/>
+                <line x1="70" y1="70" x2="90" y2="50" stroke-width="1" opacity="0.6"/>
+            </svg>
+        </div>
+
+        <div class="heart-glow"></div>
+
+        <h1 class="title">Binary Hearts</h1>
+        <h2 class="artist-name">GHOST_IN_THE_WIRE</h2>
+    </div>
+
+    <script>
+        // JavaScript for creating dynamic background particles
+        const particlesContainer = document.querySelector('.particles');
+        const numParticles = 70; // Increased number of particles for a denser effect
+
+        for (let i = 0; i < numParticles; i++) {
+            let particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            // Random size for particles
+            let size = Math.random() * 4 + 1; // Sizes between 1px and 5px
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            
+            // Random horizontal position
+            particle.style.left = `${Math.random() * 100}%`;
+            // Random animation duration for varied speeds
+            particle.style.animationDuration = `${Math.random() * 7 + 8}s`; // Between 8s and 15s
+            // Random animation delay to stagger appearance
+            particle.style.animationDelay = `${Math.random() * 7}s`; // Up to 7s delay
+
+            // Randomize particle color between the two glow colors
+            if (Math.random() > 0.5) {
+                particle.style.backgroundColor = 'var(--glow-color-1)'; // Pink
+                particle.style.boxShadow = '0 0 5px var(--glow-color-1)';
+            } else {
+                particle.style.backgroundColor = 'var(--glow-color-2)'; // Cyan
+                particle.style.boxShadow = '0 0 5px var(--glow-color-2)';
+            }
+            
+            particlesContainer.appendChild(particle);
+        }
+    </script>
+
+</body>
+</html>
