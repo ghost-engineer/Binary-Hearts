@@ -234,6 +234,60 @@
             padding: 0 10px;
         }
 
+        /* Audio player styles */
+        .audio-player {
+            position: absolute;
+            left: 50%;
+            top: 70%;
+            transform: translate(-50%, 0);
+            width: 90%;
+            max-width: 400px;
+            background: rgba(30, 30, 30, 0.7);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px #0008;
+            padding: 1.2em 1em 1.5em 1em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.7em;
+            z-index: 10;
+        }
+        .audio-player label {
+            color: var(--text-color);
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 1em;
+            margin-bottom: 0.2em;
+        }
+        .audio-player select {
+            width: 100%;
+            padding: 0.4em;
+            border-radius: 4px;
+            border: 1px solid #444;
+            background: #222;
+            color: var(--text-color);
+            font-family: 'Chakra Petch', sans-serif;
+        }
+        .audio-player audio {
+            width: 100%;
+            margin-top: 0.5em;
+            background: #111;
+            border-radius: 4px;
+        }
+        .audio-player button {
+            background: #222;
+            color: var(--glow-color-2);
+            border: none;
+            border-radius: 3px;
+            padding: 0.4em 1em;
+            cursor: pointer;
+        }
+        .audio-player #now-playing {
+            color: var(--text-color);
+            font-size: 0.95em;
+            margin-top: 0.3em;
+            opacity: 0.8;
+            font-family: 'Chakra Petch', sans-serif;
+        }
     </style>
 </head>
 <body>
@@ -299,6 +353,46 @@
 
         <h1 class="title">Binary Hearts</h1>
         <h2 class="artist-name">GHOST_IN_THE_WIRE</h2>
+
+        <!-- Control buttons for player and links -->
+        <div style="position:absolute; top:1.2em; left:1.2em; z-index:30; display:flex; gap:0.6em;">
+            <button id="toggle-player-btn" style="background:#222; color:var(--glow-color-2); border:none; border-radius:5px; padding:0.3em 0.7em; font-size:0.7em; cursor:pointer;">Show Player</button>
+            <button id="link-panel-btn" style="background:#222; color:var(--glow-color-1); border:none; border-radius:5px; padding:0.3em 0.7em; font-size:0.7em; cursor:pointer;">Link to...</button>
+        </div>
+        <!-- Link panel (hidden by default) -->
+        <div id="link-panel" style="display:none; position:absolute; top:0; left:0; width:100%; background:rgba(20,20,20,0.97); z-index:40; padding:1.2em 0 0.7em 0; text-align:center; box-shadow:0 2px 12px #000a;">
+            <button id="close-link-panel" style="position:absolute; right:1.2em; top:1.2em; background:#222; color:#fff; border:none; border-radius:3px; padding:0.2em 0.7em; font-size:1em; cursor:pointer;">×</button>
+            <div style="display:flex; flex-direction:column; gap:0.7em; align-items:center; justify-content:center; margin-top:0.2em;">
+                <a href="https://t.me/if_g_nil" target="_blank" style="color:var(--glow-color-1); font-size:1.1em; text-decoration:none;">Telegram</a>
+                <a href="https://www.youtube.com/@if_g_nil" target="_blank" style="color:var(--glow-color-2); font-size:1.1em; text-decoration:none;">YouTube</a>
+                <div style="color:var(--text-color); font-size:1em; word-break:break-all;">TRC20 wallet:<br><span style="font-family:monospace; color:#fff;">TXHrz8hLXaWhKqDRgM6dk1JCMDuRRMhZAH</span></div>
+            </div>
+        </div>
+        <!-- Audio player for album tracks -->
+        <div class="audio-player" id="audio-player-panel" style="display:none;">
+            <label for="track-select">Select a track:</label>
+            <select id="track-select">
+                <option value="01 - Your Static.mp3">01 - Your Static</option>
+                <option value="02 - A New Color.mp3">02 - A New Color</option>
+                <option value="03 - Version 2_0.mp3">03 - Version 2_0</option>
+                <option value="04 - Shared Secret.mp3">04 - Shared Secret</option>
+                <option value="05 - Heartbeat Latency.mp3">05 - Heartbeat Latency</option>
+                <option value="06 - Unencrypted.mp3">06 - Unencrypted</option>
+                <option value="07 - Flesh and Wire (version).mp3">07 - Flesh and Wire (version)</option>
+                <option value="08 - Our Glitch.mp3">08 - Our Glitch</option>
+                <option value="09 - Safe Harbor (version).mp3">09 - Safe Harbor (version)</option>
+                <option value="10 - Binary Sunset.mp3">10 - Binary Sunset</option>
+            </select>
+            <audio id="audio" controls>
+                <source id="audio-source" src="album/01 - Your Static.mp3" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+            <div style="display:flex; gap:1em; margin-top:0.2em;">
+                <button id="prev-btn" title="Previous track">Prev</button>
+                <button id="next-btn" title="Next track">Next</button>
+            </div>
+            <div id="now-playing">Now playing: 01 - Your Static</div>
+        </div>
     </div>
 
     <script>
@@ -333,6 +427,100 @@
             
             particlesContainer.appendChild(particle);
         }
+
+        // --- Audio player logic and panel controls ---
+        const audioPlayerPanel = document.getElementById('audio-player-panel');
+        const togglePlayerBtn = document.getElementById('toggle-player-btn');
+        const linkPanelBtn = document.getElementById('link-panel-btn');
+        const linkPanel = document.getElementById('link-panel');
+        const closeLinkPanel = document.getElementById('close-link-panel');
+        const trackSelect = document.getElementById('track-select');
+        const nowPlaying = document.getElementById('now-playing');
+        const audio = document.getElementById('audio');
+        const audioSource = document.getElementById('audio-source');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        // Track list
+        const trackList = [
+            "01 - Your Static.mp3",
+            "02 - A New Color.mp3",
+            "03 - Version 2_0.mp3",
+            "04 - Shared Secret.mp3",
+            "05 - Heartbeat Latency.mp3",
+            "06 - Unencrypted.mp3",
+            "07 - Flesh and Wire (version).mp3",
+            "08 - Our Glitch.mp3",
+            "09 - Safe Harbor (version).mp3",
+            "10 - Binary Sunset.mp3"
+        ];
+        const trackNames = [
+            "01 - Your Static",
+            "02 - A New Color",
+            "03 - Version 2_0",
+            "04 - Shared Secret",
+            "05 - Heartbeat Latency",
+            "06 - Unencrypted",
+            "07 - Flesh and Wire (version)",
+            "08 - Our Glitch",
+            "09 - Safe Harbor (version)",
+            "10 - Binary Sunset"
+        ];
+        let currentTrack = 0;
+
+        function setTrack(index) {
+            currentTrack = index;
+            audioSource.src = `album/${trackList[index]}`;
+            audio.load();
+            nowPlaying.textContent = `Now playing: ${trackNames[index]}`;
+            trackSelect.selectedIndex = index;
+        }
+
+        // Change track via select
+        trackSelect.addEventListener('change', function() {
+            setTrack(this.selectedIndex);
+            audio.play();
+        });
+
+        // Prev/Next
+        prevBtn.addEventListener('click', function() {
+            let idx = currentTrack - 1;
+            if (idx < 0) idx = trackList.length - 1;
+            setTrack(idx);
+            audio.play();
+        });
+        nextBtn.addEventListener('click', function() {
+            let idx = currentTrack + 1;
+            if (idx >= trackList.length) idx = 0;
+            setTrack(idx);
+            audio.play();
+        });
+        // Auto next track
+        audio.addEventListener('ended', function() {
+            let idx = currentTrack + 1;
+            if (idx >= trackList.length) idx = 0;
+            setTrack(idx);
+            audio.play();
+        });
+        // Init
+        window.addEventListener('DOMContentLoaded', function() {
+            setTrack(0);
+        });
+
+        // Show/hide player
+        togglePlayerBtn.addEventListener('click', function() {
+            const isVisible = audioPlayerPanel.style.display === 'flex';
+            audioPlayerPanel.style.display = isVisible ? 'none' : 'flex';
+            togglePlayerBtn.textContent = isVisible ? 'Show Player' : 'Hide Player';
+        });
+        // Show link panel
+        linkPanelBtn.addEventListener('click', function() {
+            linkPanel.style.display = 'block';
+        });
+        // Close link panel
+        closeLinkPanel.addEventListener('click', function() {
+            linkPanel.style.display = 'none';
+        });
     </script>
 
 </body>
